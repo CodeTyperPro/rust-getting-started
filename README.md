@@ -1,1 +1,3 @@
-# Getting started with Rust# rust-getting-started
+# Getting started with Rust
+
+Content.
