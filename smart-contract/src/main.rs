@@ -63,7 +63,7 @@ fn add_candidate(candidate: Candidate) {
     hash_candidates.insert(candidate.code, candidate.clone());
 }
 
-fn add_voter(voter: Vote, hash_voters: HashMap<String, u64>r) {
+fn add_voter(voter: Voter) {
     array_voters.push(voter.clone());
     hash_voters.insert(voter.identifier, voter.choice_code);
     state = ElectionState::Happening;
@@ -90,7 +90,7 @@ fn place_vote(voter: Voter) {
     }
 }
 
-unsafe fn winning_candidate(hash_candidates: HashMap<u64, Candidate>) -> Option<Candidate> {
+fn winning_candidate() -> Option<Candidate> {
     let mut winner_candidate: Option<Candidate> = None;
     for (_, val) in hash_candidates {
         match winner_candidate {
@@ -128,29 +128,41 @@ fn reading_file(file_path: &String) {
     println!("With text:\n{}", contents);
 }
 
+fn display_voters() {
+    println!("Voters: ");
+    for (_, val) in hash_voters {
+        println!("{}", val);
+    }
+}
+
+fn display_candidates() {
+    println!("Candidates: ");
+    for (_, val) in hash_candidates {
+        println!("{}", val);
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() < 3 {
-        println!("Usage: {} <query> <file_path>", args[0]);
+    if args.len() < 4 {
+        println!("Usage: {} <query> <file_candidates> <file_voters>", args[0]);
         return;
     }
 
     let query = &args[1];
-    let file_path = &args[2];
+    let file_candidates = &args[2];
+    let file_voters = &args[3];
 
     println!("Searching for {}", query);
-    println!("In the file {}", file_path);
+    println!("In the file {}", file_candidates);
+    println!("In the file {}", file_voters);
 
-    reading_file(file_path);
+    reading_file(file_candidates);
+    reading_file(file_voters);
     test();
 
-    let a = [10, 20, 30, 40, 50];
-
-    for element in a.iter() {
-        println!("The value is: {}", element);
-    }
-
-
     winning_candidate();
+    display_voters();
+    display_candidates();
 }
