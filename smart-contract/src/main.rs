@@ -149,34 +149,6 @@ fn parse_voters(line: &str) -> Option<Voter> {
     }
 }
 
-fn reading_file_candidates(file_path: &String, hash_candidates: &mut HashMap<u64, Candidate>) -> Result<(), std::io::Error> {
-    let contents = fs::read_to_string(file_path)?;
-    let candidates: Vec<Candidate> = contents
-        .lines()
-        .filter_map(|line| parse_candidate(line))
-        .collect();
-
-    for candidate in &candidates {
-        hash_candidates.insert(candidate.code, candidate.clone());
-    }
-
-    Ok(())
-}
-
-fn reading_file_voters(file_path: &String, hash_voters: &mut HashMap<String, u64>) -> Result<(), std::io::Error> {
-    let contents = fs::read_to_string(file_path)?;
-    let voters: Vec<Voter> = contents
-        .lines()
-        .filter_map(|line| parse_voters(line))
-        .collect();
-
-    for voter in &voters {
-        hash_voters.insert(voter.identifier.clone(), voter.choice_code);
-    }
-
-    Ok(())
-}
-
 fn display_voters(hash_voters: &HashMap<String, u64>) {
     println!("Voters: ");
     for (key, val) in hash_voters.iter() {
@@ -191,7 +163,7 @@ fn display_candidates(hash_candidates: &HashMap<u64, Candidate>) {
     }
 }
 
-async fn get_json_file_from_url_candidates(hash_candidates: &mut HashMap<u64, Candidate>) -> Result<Vec<Candidate>, reqwest::Error> {
+async fn reading_file_candidates(hash_candidates: &mut HashMap<u64, Candidate>) -> Result<Vec<Candidate>, reqwest::Error> {
     let file_url = "https://raw.githubusercontent.com/CodeTyperPro/rust-getting-started/integration-leveldb/smart-contract/test-immutable-file-candidate.json";
     let response = reqwest::get(file_url).await?;
 
@@ -209,7 +181,7 @@ async fn get_json_file_from_url_candidates(hash_candidates: &mut HashMap<u64, Ca
     Ok(candidates)
 }
 
-async fn get_json_file_from_url_voters(hash_voters: &mut HashMap<String, u64>) -> Result<Vec<Voter>, reqwest::Error> {
+async fn reading_file_voters(hash_voters: &mut HashMap<String, u64>) -> Result<Vec<Voter>, reqwest::Error> {
     let file_url = "https://raw.githubusercontent.com/CodeTyperPro/rust-getting-started/integration-leveldb/smart-contract/test-immutable-file-voter.json";
     let response = reqwest::get(file_url).await?;
 
@@ -272,8 +244,8 @@ async fn main() {
     let mut array_voters: Vec<Voter> = Vec::new();
     let mut hash_candidates: HashMap<u64, Candidate> = HashMap::new();
 
-    let _ = get_json_file_from_url_candidates(&mut hash_candidates).await;
-    let _ = get_json_file_from_url_voters(&mut hash_voters).await;
+    let _ = reading_file_candidates(&mut hash_candidates).await;
+    let _ = reading_file_voters(&mut hash_voters).await;
 
     winning_candidate(&hash_candidates);
     display_voters(&hash_voters);
