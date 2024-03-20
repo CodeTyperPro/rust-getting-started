@@ -1,3 +1,5 @@
+#![allow(warnings)] 
+
 use std::fmt;
 use std::env;
 use std::fs;
@@ -8,7 +10,7 @@ use reqwest::Error;
 
 #[derive(Clone)]
 #[derive(Debug)]
-#[derive(Deserialize)] // Derive Deserialize trait for Candidate
+#[derive(Deserialize)] 
 struct Candidate {
     name: String,
     num_votes: u64,
@@ -16,6 +18,8 @@ struct Candidate {
 }
 
 #[derive(Clone)]
+#[derive(Debug)]
+#[derive(Deserialize)] 
 struct Voter {
     identifier: String,
     choice_code: u64,
@@ -196,7 +200,7 @@ async fn get_json_file_from_url_candidates(hash_candidates: &mut HashMap<u64, Ca
     }
 
     let candidates: Vec<Candidate> = response.json().await?;
-    println!("{:?}", candidates);
+    //println!("{:?}", candidates);
 
     for candidate in &candidates {
         hash_candidates.insert(candidate.code, candidate.clone());
@@ -205,8 +209,8 @@ async fn get_json_file_from_url_candidates(hash_candidates: &mut HashMap<u64, Ca
     Ok(candidates)
 }
 
-async fn get_json_file_from_url_voters(hash_voters: &mut HashMap<String, u64>) -> Result<Vec<Voters>, reqwest::Error> {
-    let file_url = "https://raw.githubusercontent.com/CodeTyperPro/rust-getting-started/integration-leveldb/smart-contract/test-immutable-voter.json";
+async fn get_json_file_from_url_voters(hash_voters: &mut HashMap<String, u64>) -> Result<Vec<Voter>, reqwest::Error> {
+    let file_url = "https://raw.githubusercontent.com/CodeTyperPro/rust-getting-started/integration-leveldb/smart-contract/test-immutable-file-voter.json";
     let response = reqwest::get(file_url).await?;
 
     if !response.status().is_success() {
@@ -214,7 +218,7 @@ async fn get_json_file_from_url_voters(hash_voters: &mut HashMap<String, u64>) -
     }
 
     let voters: Vec<Voter> = response.json().await?;
-    println!("{:?}", voters);
+    //println!("{:?}", voters);
 
     for voter in &voters {
         hash_voters.insert(voter.identifier.clone(), voter.choice_code);
@@ -262,37 +266,17 @@ fn load_data() {
 
 #[tokio::main]
 async fn main() {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() < 4 {
-        println!("Usage: {} <query> <file_candidates> <file_voters>", args[0]);
-        return;
-    }
-
-    let query = &args[1];
-    let file_candidates = &args[2];
-    let file_voters = &args[3];
-
-    println!("Searching for {}", query);
-    println!("In the file {}", file_candidates);
-    println!("In the file {}", file_voters);
-
-    // test();
     
     let mut state: ElectionState = ElectionState::Announced;
     let mut hash_voters: HashMap<String, u64> = HashMap::new();
     let mut array_voters: Vec<Voter> = Vec::new();
     let mut hash_candidates: HashMap<u64, Candidate> = HashMap::new();
-    
-/*    reading_file_candidates(file_candidates, &mut hash_candidates).expect("Error reading candidates file");
-    reading_file_voters(file_voters, &mut hash_voters).expect("Error reading voters file");
-
-*/
 
     let _ = get_json_file_from_url_candidates(&mut hash_candidates).await;
     let _ = get_json_file_from_url_voters(&mut hash_voters).await;
 
     winning_candidate(&hash_candidates);
     display_voters(&hash_voters);
+    println!("");
     display_candidates(&hash_candidates);
 }
