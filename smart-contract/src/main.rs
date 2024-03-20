@@ -187,8 +187,45 @@ fn display_candidates(hash_candidates: &HashMap<u64, Candidate>) {
     }
 }
 
+async fn get_json_file_from_url_candidates(hash_candidates: &mut HashMap<u64, Candidate>) -> Result<Vec<Candidate>, reqwest::Error> {
+    let file_url = "https://raw.githubusercontent.com/CodeTyperPro/rust-getting-started/integration-leveldb/smart-contract/test-immutable-file-candidate.json";
+    let response = reqwest::get(file_url).await?;
+
+    if !response.status().is_success() {
+        println!("Failed to fetch data: {}", response.status());
+    }
+
+    let candidates: Vec<Candidate> = response.json().await?;
+    println!("{:?}", candidates);
+
+    for candidate in &candidates {
+        hash_candidates.insert(candidate.code, candidate.clone());
+    }
+
+    Ok(candidates)
+}
+
+async fn get_json_file_from_url_voters(hash_voters: &mut HashMap<String, u64>) -> Result<Vec<Voters>, reqwest::Error> {
+    let file_url = "https://raw.githubusercontent.com/CodeTyperPro/rust-getting-started/integration-leveldb/smart-contract/test-immutable-voter.json";
+    let response = reqwest::get(file_url).await?;
+
+    if !response.status().is_success() {
+        println!("Failed to fetch data: {}", response.status());
+    }
+
+    let voters: Vec<Voter> = response.json().await?;
+    println!("{:?}", voters);
+
+    for voter in &voters {
+        hash_voters.insert(voter.identifier.clone(), voter.choice_code);
+    }
+
+    Ok(voters)
+}
+
+
 async fn get_json_file_from_url() -> Result<Vec<Candidate>, reqwest::Error> {
-    let file_url = "https://example-files.online-convert.com/document/txt/example.json";
+    let file_url = "https://github.com/CodeTyperPro/rust-getting-started/blob/integration-leveldb/smart-contract/test-immutable-file.json";
     let response = reqwest::get(file_url).await?;
 
     if !response.status().is_success() {
@@ -250,9 +287,12 @@ async fn main() {
 /*    reading_file_candidates(file_candidates, &mut hash_candidates).expect("Error reading candidates file");
     reading_file_voters(file_voters, &mut hash_voters).expect("Error reading voters file");
 
+*/
+
+    let _ = get_json_file_from_url_candidates(&mut hash_candidates).await;
+    let _ = get_json_file_from_url_voters(&mut hash_voters).await;
+
     winning_candidate(&hash_candidates);
     display_voters(&hash_voters);
-    display_candidates(&hash_candidates);*/
-
-    get_json_file_from_url().await;
+    display_candidates(&hash_candidates);
 }

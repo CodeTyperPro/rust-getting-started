@@ -1,0 +1,18 @@
+[
+  {
+    "identifier": "Voter1",
+    "choice_code": 123456
+  },
+  {
+    "identifier": "Voter2",
+    "choice_code": 789012
+  },
+  {
+    "identifier": "Voter3",
+    "choice_code": 345678
+  },
+  {
+    "identifier": "Voter4",
+    "choice_code": 901234
+  }
+]
