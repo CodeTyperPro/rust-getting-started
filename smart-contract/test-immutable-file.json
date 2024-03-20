@@ -1,0 +1,22 @@
+[
+  {
+    "name": "John Doe",
+    "num_votes": 100,
+    "code": 123456
+  },
+  {
+    "name": "Jane Smith",
+    "num_votes": 85,
+    "code": 789012
+  },
+  {
+    "name": "Michael Johnson",
+    "num_votes": 120,
+    "code": 345678
+  },
+  {
+    "name": "Emily Davis",
+    "num_votes": 95,
+    "code": 901234
+  }
+]

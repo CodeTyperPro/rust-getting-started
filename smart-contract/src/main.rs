@@ -2,8 +2,13 @@ use std::fmt;
 use std::env;
 use std::fs;
 use std::collections::HashMap;
+use serde::Deserialize;
+use reqwest::Error;
+
 
 #[derive(Clone)]
+#[derive(Debug)]
+#[derive(Deserialize)] // Derive Deserialize trait for Candidate
 struct Candidate {
     name: String,
     num_votes: u64,
@@ -182,7 +187,44 @@ fn display_candidates(hash_candidates: &HashMap<u64, Candidate>) {
     }
 }
 
-fn main() {
+async fn get_json_file_from_url() -> Result<Vec<Candidate>, reqwest::Error> {
+    let file_url = "https://example-files.online-convert.com/document/txt/example.json";
+    let response = reqwest::get(file_url).await?;
+
+    if !response.status().is_success() {
+        println!("Failed to fetch data: {}", response.status());
+    }
+
+    let candidates: Vec<Candidate> = response.json().await?;
+    println!("{:?}", candidates);
+
+    Ok(candidates)
+}
+
+fn load_data() {
+    let file_url = "test-immutable-file.txt";
+    let file_git = "https://github.com/CodeTyperPro/rust-getting-started/blob/main/smart-contract/file_candidates.txt";
+    use rusty_leveldb::{DB, DBIterator, LdbIterator, Options};
+    
+    let mut opt = Options::default();
+    opt.create_if_missing = true;
+
+    let mut db = DB::open(file_url, opt).unwrap();
+
+    db.put(b"Hello", b"World").unwrap();
+    assert_eq!(b"World", db.get(b"Hello").unwrap().as_slice());
+
+    let mut iter = db.new_iter().unwrap();
+    // Note: For efficiency reasons, it's recommended to use advance() and current() instead of
+    // next() when iterating over many elements.
+    assert_eq!((b"Hello".to_vec(), b"World".to_vec()), iter.next().unwrap());
+
+    // db.delete(b"Hello").unwrap();
+    db.flush().unwrap();
+}
+
+#[tokio::main]
+async fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() < 4 {
@@ -205,10 +247,12 @@ fn main() {
     let mut array_voters: Vec<Voter> = Vec::new();
     let mut hash_candidates: HashMap<u64, Candidate> = HashMap::new();
     
-    reading_file_candidates(file_candidates, &mut hash_candidates).expect("Error reading candidates file");
+/*    reading_file_candidates(file_candidates, &mut hash_candidates).expect("Error reading candidates file");
     reading_file_voters(file_voters, &mut hash_voters).expect("Error reading voters file");
 
     winning_candidate(&hash_candidates);
     display_voters(&hash_voters);
-    display_candidates(&hash_candidates);
+    display_candidates(&hash_candidates);*/
+
+    get_json_file_from_url().await;
 }
